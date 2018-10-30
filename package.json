@@ -1,0 +1,13 @@
+{
+  "name": "sqe-backend",
+  "description": "Scripta Qumranica Electronica - Backend for Dev purposes",
+  "version": "0.3.0",
+  "scripts": {
+    "bootstrap": "node ./bin/bootstrap.js"
+  },
+  "dependencies": {
+    "command-exists": "^1.2.8",
+    "mariadb": "^2.0.0-alpha",
+    "rimraf": "^2.6.2"
+  }
+}

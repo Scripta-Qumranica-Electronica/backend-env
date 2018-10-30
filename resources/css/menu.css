@@ -1,0 +1,48 @@
+.accordion-panel {
+  border-bottom-width:2px;
+  border-bottom-color:lightblue;
+  border-bottom-style: solid;
+}
+
+.accordion-title {
+  visibility: hidden;
+}
+
+.open_first .accordion-title {
+  visibility: visible;
+}
+
+.accordion-panel .accordion-content {
+  visibility: hidden;
+  max-height: 0vh;
+}
+
+.open_first .accordion-content {
+  visibility: visible;
+  max-height: 25vh;
+}
+
+#combinations {
+  overflow-y: auto;
+}
+
+#new-combination {
+  visibility: hidden;
+}
+
+#fragments {
+  overflow-y: auto;
+}
+
+#artefacts {
+  overflow-y: auto;
+}
+
+#gui {
+  overflow-y: auto;
+}
+
+.menu {
+  color: white;
+  padding-right: 5px;
+}

@@ -1,0 +1,246 @@
+html, body {
+	background-color: white;
+	margin: 0;
+	padding: 0;
+	-webkit-animation: bugfix infinite 1s;
+}
+
+html, body, #app {
+  font-size: 20px;
+  width: 100%;
+  height: 100%;
+}
+
+@-webkit-keyframes bugfix { from {padding:0;} to {padding:0;} }
+
+
+#site {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+	margin-left: -300px;
+	-webkit-box-sizing:border-box;
+	        box-sizing:border-box;
+	-webkit-transition: .6s ease all;
+					transition: .6s ease all;
+}
+
+#main-menu {
+  width: 300px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #428bca;
+  color: white;
+  -webkit-transform: translate3d(0, 0, 0);
+          transform: translate3d(0, 0, 0);
+	-webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+#editing-panes {
+  visibility: hidden;
+  height: 100vh;
+	margin-left: 300px;
+  position: relative;
+  /* background-image: url(../../resources/images/SQE.svg); */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-transform: translate3d(0, 0, 0);
+          transform: translate3d(0, 0, 0);
+	-webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transition: none;
+  transition: none;
+}
+
+#main-osd {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.pane-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+	padding: 5px;
+}
+
+.pane-menu img {
+	opacity: 0.25;
+}
+
+.pane-menu img:hover {
+	opacity: 0.75;
+}
+
+.main-container {
+  overflow: hidden;
+  position: relative;
+	-webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+          transform: translate3d(0, 0, 0);
+}
+
+#single-image-container {
+	width: 50%;
+  height: 70%;
+  float: left;
+}
+
+#signs-container {
+  width: 50%;
+  height: 70%;
+  margin-left: 50%;
+  overflow: auto;
+}
+
+#combination-container {
+  width: 100%;
+  height: 30%;
+}
+
+.main-pane {
+  position: absolute;
+  top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#single-image-pane {
+  min-width: 200px;
+  right: 0;
+}
+
+#single-image-control {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0.65;
+  top: 40px;
+  right: 40px;
+}
+
+.single-image-view {
+  position: absolute;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+  opacity: 1.0;
+}
+
+.list-group {
+  border-radius: 15px;
+  background: #E1E1D0;
+  padding: 10px;
+}
+
+.drag-handle {
+	margin-right: 10px;
+	font: bold 20px Sans-Serif;
+	color: #5F9EDF;
+	display: inline-block;
+	cursor: move;
+	cursor: -webkit-grabbing;  /* overrides 'move' */
+}
+
+#signs-pane {
+  min-width: 200px;
+  left: 0;
+}
+
+#combination-pane {
+  min-height: 200px;
+  left: 0;
+  overflow: auto;
+}
+
+#combination-zoom-slider {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.fragment {
+  pointer-events: none;
+}
+
+.fragment-cont-xy {
+  position: absolute;
+  z-index: 1;
+}
+
+.fragment-cont-rot {
+  position: relative;
+  z-index: inherit;
+}
+
+svg {
+  pointer-events: none;
+}
+
+svg g {
+	transition: opacity 0.1s ease;
+	opacity: 1.0;
+}
+
+.fragOutline {
+	visibility: hidden;
+}
+
+.clippedImg {
+  pointer-events: all;
+}
+
+.pane-size {
+	top: 0;
+	left: 0;
+	background: gray;
+}
+
+#horizontal-divider {
+	position: absolute;
+	width: 3px;
+	height: 100%;
+	cursor: ew-resize;
+}
+
+#vertical-divider {
+	position: absolute;
+	width: 100%;
+	height: 4px;
+	cursor: ns-resize;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+/* CSS for QWB HTML Text--Remove after Martin integrates text editor */
+.QWB_SCROLL
+{
+    color: white;
+    font-size: 16pt;
+    direction: rtl;
+    padding: 5pt;    
+}
+
+.QWB_RECONSTRUCTED
+{
+    color: #e69900;
+    text-shadow:
+    -1px -1px 0 white,
+    1px -1px 0 white,
+    -1px 1px 0 white,
+    1px 1px 0 white;
+}
