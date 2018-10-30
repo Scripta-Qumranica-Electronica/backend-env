@@ -3,10 +3,6 @@
 .idea
 yarn-error.log
 node_modules
-dist
-
-coverage/
-.coveralls.yml
 
 resources/cgi-bin/local
 resources/perl-libs
