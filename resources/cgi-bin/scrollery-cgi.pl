@@ -65,7 +65,8 @@ sub processCGI {
 		getTextOfFragment => \&getTextOfFragment,
 		getListOfAttributes => \&getListOfAttributes,
     changeColName => \&changeColName,
-    changeCombinationName => \&changeCombinationName
+    changeCombinationName => \&changeCombinationName,
+    searchCombinationsByManuscript => \&searchCombinationsByManuscript
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -1036,6 +1037,40 @@ sub changeCombinationName() {
 	$cgi->change_scroll_name($json_post->{name});
   print '{"name":"' . $json_post->{name} . 
     '","scroll_version_id":' . $json_post->{scroll_version_id} . '}';
+}
+
+# This is a patch to allow Chelem to move forward with their menu
+# give it a "user_id" and "search_term" in the JSON payload.
+# The "user_id" can be 1 for public users.
+
+sub searchCombinationsByManuscript() {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id, 
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+LEFT JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+LEFT JOIN image_to_edition_catalog USING(edition_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+    AND scroll_data.name LIKE CONCAT("%", ?, "%")
+GROUP BY scroll_data.scroll_id
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{user_id}, $json_post->{search_term});
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
 }
 
 processCGI();
