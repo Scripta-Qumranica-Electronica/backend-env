@@ -21,16 +21,16 @@ sub processCGI {
 
 	my %actions = (
 		validateSession => \&validateSession,
-		requestCombs => \&requestCombs,
+		getCombs => \&getCombs,
     getImages => \&getImages,
-		requestArtOfComb => \&requestArtOfComb,
-		requestArtOfImage => \&requestArtOfImage,
-		requestImgOfComb => \&requestImgOfComb,
-		requestColOfComb => \&requestColOfComb,
+		getArtOfComb => \&getArtOfComb,
+		getArtOfImage => \&getArtOfImage,
+		getImgOfComb => \&getImgOfComb,
+		getColOfComb => \&getColOfComb,
 		getSignStreamOfColumn => \&getSignStreamOfColumn,
 		getSignStreamOfFrag => \&getSignStreamOfFrag,
 		getImagesOfFragment => \&getImagesOfFragment,
-		requestImagesOfInstFragments => \&requestImagesOfInstFragments,
+		imagesOfInstFragments => \&imagesOfInstFragments,
 		getInstitutionArtefacts => \&getInstitutionArtefacts,
 		getScrollWidth => \&getScrollWidth,
 		getScrollHeight => \&getScrollHeight,
@@ -60,12 +60,14 @@ sub processCGI {
     getSignCharAttributeCommentary => \& getSignCharAttributeCommentary,
 		addRoiToScroll => \&addRoiToScroll,
 		removeROI => \&removeROI,
-		requestRoiOfCol => \&requestRoiOfCol,
+		getRoiOfCol => \&getRoiOfCol,
 		getRoisOfCombination => \&getRoisOfCombination,
-		requestTextOfFragment => \&requestTextOfFragment,
+		getTextOfFragment => \&getTextOfFragment,
+		getListOfAttributes => \&getListOfAttributes,
     changeColName => \&changeColName,
     changeCombinationName => \&changeCombinationName,
-    requestListOfAttributes => \&requestListOfAttributes
+    searchCombinationsByManuscript => \&searchCombinationsByManuscript,
+    searchCombinationsByPlate => \&searchCombinationsByPlate
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -157,7 +159,7 @@ sub validateSession {
 	return;
 }
 
-sub requestCombs {
+sub getCombs {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
 	my $getCombsQuery = <<'MYSQL';
 SELECT DISTINCT 
@@ -206,7 +208,7 @@ MYSQL
 	return;
 }
 
-sub requestArtOfComb {
+sub getArtOfComb {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
 	my $getColOfCombQuery = <<'MYSQL';
 SELECT DISTINCT artefact.artefact_id AS artefact_id,
@@ -232,9 +234,9 @@ MYSQL
 	return;
 }
 
-sub requestArtOfImage {
+sub getArtOfImage {
 	my ($cgi, $json_post) = @_;
-	my $requestArtOfImageQuery = <<'MYSQL';
+	my $getArtOfImageQuery = <<'MYSQL';
 SELECT DISTINCT	artefact_position.artefact_position_id AS artefact_position_id,
 				artefact_shape.artefact_shape_id AS artefact_shape_id,
 				artefact_position.artefact_id AS artefact_id,
@@ -259,7 +261,7 @@ WHERE SQE_image.image_catalog_id = ?
 			AND artefact_position_owner.scroll_version_id = ?
       AND artefact_data_owner.scroll_version_id = ?
 MYSQL
-	my $sql = $cgi->dbh->prepare_cached($requestArtOfImageQuery) or die
+	my $sql = $cgi->dbh->prepare_cached($getArtOfImageQuery) or die
 		"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
 	$sql->execute($json_post->{image_catalog_id}, $json_post->{scroll_version_id}, $json_post->{scroll_version_id}, $json_post->{scroll_version_id});
 
@@ -267,7 +269,7 @@ MYSQL
 	return;
 }
 
-sub requestImgOfComb {
+sub getImgOfComb {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
 	my $getColOfCombQuery = <<'MYSQL';
 SELECT DISTINCT image_catalog.catalog_number_1 AS lvl1,
@@ -298,7 +300,7 @@ MYSQL
 	return;
 }
 
-sub requestColOfComb {
+sub getColOfComb {
 	my ($cgi, $json_post) = @_;
   my $cols = $cgi->get_cols_for_scrollversion($json_post->{scroll_version_id});
   print "{\"results\":$cols}";
@@ -417,7 +419,7 @@ MYSQL
 	return;
 }
 
-sub requestImagesOfInstFragments {
+sub imagesOfInstFragments {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
 	my $getInstitutionFragmentsQuery = <<'MYSQL';
 SELECT DISTINCT	SQE_image.sqe_image_id,
@@ -736,35 +738,8 @@ sub addSigns() {
 		if ($counter == 1) {
 			$prev_sign_id = $sign->{previous_sign_id};
 		}
-		if (scalar @{$sign->{attribute_value_ids}} > 0) {
-			$prev_sign_id = $cgi->insert_sign($sign->{sign}, $prev_sign_id, $next_sign_id, @{$sign->{attribute_value_ids}});
-		} else {
-			$prev_sign_id = $cgi->insert_sign($sign->{sign}, $prev_sign_id, $next_sign_id);
-		}
-		print "\"$sign->{uuid}\":{\"sign_id\":$prev_sign_id";
-		
-		# Now let's grab the new sign_char_id as well.
-		my $signCharQuery = <<'MYSQL';
-		SELECT sign_char_id
-		FROM sign_char
-		WHERE sign_id = ?
-MYSQL
-		my $sql = $cgi->dbh->prepare_cached($signCharQuery) or die
-				",\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-		$sql->execute($prev_sign_id);
-		
-		#TODO: we need to also grab all sign_char_attribute_ids as an array.
-		while (my $result = $sql->fetchrow_hashref){
-			my $new_id = $result->{sign_char_id};
-			# if ($sign->{attribute_value_ids} > 1) {
-   #  		my $attr_id = $cgi->set_sign_char_attribute(
-			# 		$new_id, 
-			# 		$sign->{attribute_value_ids});
-			# }
-			print ",\"sign_char_id\":$new_id}";
-    }
-		 	
-		
+		$prev_sign_id = $cgi->insert_sign($sign->{sign}, $prev_sign_id, $next_sign_id);
+		print "\"$sign->{uuid}\":$prev_sign_id";
 		if ($counter != $repeatLength) {
 			print "},{";
 			$counter++;
@@ -960,7 +935,7 @@ sub removeROI() {
 	$cgi->remove_roi($json_post->{sign_char_roi_id});
 }
 
-sub requestRoiOfCol() {
+sub getRoiOfCol() {
 	my ($cgi, $json_post) = @_;
 
 	my $sqlQuery = <<'MYSQL';
@@ -1019,12 +994,28 @@ MYSQL
 	return;
 }
 
-sub requestTextOfFragment() {
+sub getTextOfFragment() {
 	my ($cgi, $json_post) = @_;
 	$cgi->set_scrollversion($json_post->{scroll_version_id});
 	print "{";
 	$cgi->get_text_of_fragment($json_post->{col_id}, 'SQE_Format::JSON');
 	print "}";
+}
+
+sub getListOfAttributes() {
+	my ($cgi, $json_post) = @_;
+	my $query = <<'MYSQL';
+	SELECT attribute.attribute_id, name, type, attribute.description AS attribute_description,
+		attribute_value_id, string_value, attribute_value.description AS attribute_value_description
+	FROM attribute
+	JOIN attribute_value USING(attribute_id)
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($query) or die
+		"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute();
+
+	readResults($sql);
+	return;
 }
 
 # This seems to run without error, but the relevant data
@@ -1049,25 +1040,109 @@ sub changeCombinationName() {
     '","scroll_version_id":' . $json_post->{scroll_version_id} . '}';
 }
 
-sub requestListOfAttributes() {
+# This is a patch to allow Chelem to move forward with their menu
+# give it a "user_id" and "search_term" in the JSON payload.
+# The "user_id" can be 1 for public users.
+
+sub searchCombinationsByManuscript() {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
-	my $getAttrsQuery = <<'MYSQL';
-SELECT	attribute.attribute_id, 
-				attribute_value_id, 
-				string_value AS attribute_value_name,
-				attribute_value.description AS attribute_value_description, 
-				attribute.name AS attribute_name, 
-				attribute.description AS attribute_description, 
-				type
-FROM attribute_value
-JOIN attribute USING(attribute_id)
+	my $getCombsQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id, 
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+LEFT JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+LEFT JOIN image_to_edition_catalog USING(edition_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+    AND scroll_data.name LIKE CONCAT("%", ?, "%")
+GROUP BY scroll_data.scroll_id
 MYSQL
-	my $sql = $cgi->dbh->prepare_cached($getAttrsQuery) or die
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute();
+	$sql->execute($json_post->{user_id}, $json_post->{search_term});
 
 	readResults($sql, $key, $lastItem);
 	return;
+	
+}
+
+# This is a patch to allow Chelem to move forward with their menu
+# give it a "user_id" and "plate" in the JSON payload, a "fragment" is optional.
+# The "user_id" can be 1 for public users.
+
+sub searchCombinationsByPlate() {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+  my ($findPlateQuery, $sql);
+  if (defined $json_post->{fragment}) {
+    $findPlateQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id, 
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails,
+	image_catalog.catalog_number_1 AS plate,
+	image_catalog.catalog_number_2 AS fragment,
+  image_catalog.image_catalog_id,
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+JOIN image_to_edition_catalog USING(edition_catalog_id)
+JOIN image_catalog USING(image_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+    AND image_catalog.catalog_number_1 LIKE CONCAT("%", ?, "%")
+    AND image_catalog.catalog_number_2 LIKE CONCAT("%", ?, "%")
+GROUP BY scroll_version.user_id, SQE_image.filename
+ORDER BY image_catalog.image_catalog_id
+MYSQL
+    $sql = $cgi->dbh->prepare_cached($findPlateQuery) or die
+        "{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+    $sql->execute($json_post->{user_id}, $json_post->{plate}, $json_post->{fragment});
+  } else {
+      $findPlateQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id, 
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails,
+	image_catalog.catalog_number_1 AS plate,
+	image_catalog.catalog_number_2 AS fragment,
+  image_catalog.image_catalog_id,
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+JOIN image_to_edition_catalog USING(edition_catalog_id)
+JOIN image_catalog USING(image_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+    AND image_catalog.catalog_number_1 LIKE CONCAT("%", ?, "%")
+GROUP BY scroll_version.user_id, SQE_image.filename
+ORDER BY image_catalog.image_catalog_id
+MYSQL
+    $sql = $cgi->dbh->prepare_cached($findPlateQuery) or die
+        "{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+    $sql->execute($json_post->{user_id}, $json_post->{plate});
+  }
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
 }
 
 processCGI();
