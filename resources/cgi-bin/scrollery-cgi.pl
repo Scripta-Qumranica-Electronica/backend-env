@@ -69,7 +69,9 @@ sub processCGI {
     searchCombinationsByManuscript => \&searchCombinationsByManuscript,
     searchCombinationsByPlate => \&searchCombinationsByPlate,
     listingOfAllManuscripts => \&listingOfAllManuscripts,
-    listingOfAllManuscriptsPaginated =>\&listingOfAllManuscriptsPaginated
+    listingOfAllManuscriptsPaginated => \&listingOfAllManuscriptsPaginated,
+    listScrolls => \&listScrolls,
+    getMyScrollVersions => \&getMyScrollVersions
 	);
 	my $json_post = $cgi->{CGIDATA};
 
