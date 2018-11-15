@@ -67,7 +67,9 @@ sub processCGI {
     changeColName => \&changeColName,
     changeCombinationName => \&changeCombinationName,
     searchCombinationsByManuscript => \&searchCombinationsByManuscript,
-    searchCombinationsByPlate => \&searchCombinationsByPlate
+    searchCombinationsByPlate => \&searchCombinationsByPlate,
+    listingOfAllManuscripts => \&listingOfAllManuscripts,
+    listingOfAllManuscriptsPaginated =>\&listingOfAllManuscriptsPaginated
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -1139,6 +1141,74 @@ MYSQL
         "{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
     $sql->execute($json_post->{user_id}, $json_post->{plate});
   }
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+# This is a patch to allow Chelem to move forward with their menu
+# give it a "user_id" in the JSON payload.
+# The "user_id" can be 1 for public users.
+
+sub listingOfAllManuscripts() {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id, 
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+LEFT JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+LEFT JOIN image_to_edition_catalog USING(edition_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+GROUP BY scroll_data.scroll_id
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{user_id});
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+# This is a patch to allow Chelem to move forward with their menu
+# give it a "user_id" in the JSON payload.
+# The "user_id" can be 1 for public users.
+
+sub listingOfAllManuscriptsPaginated() {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id, 
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+LEFT JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+LEFT JOIN image_to_edition_catalog USING(edition_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+AND scroll_version_id > ?
+GROUP BY scroll_data.scroll_id
+LIMIT ?
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{user_id}, $json_post->{left_off}, $json_post->{limit});
 
 	readResults($sql, $key, $lastItem);
 	return;
