@@ -69,7 +69,9 @@ sub processCGI {
     searchCombinationsByManuscript => \&searchCombinationsByManuscript,
     searchCombinationsByPlate => \&searchCombinationsByPlate,
     listingOfAllManuscripts => \&listingOfAllManuscripts,
-    listingOfAllManuscriptsPaginated =>\&listingOfAllManuscriptsPaginated
+    listingOfAllManuscriptsPaginated => \&listingOfAllManuscriptsPaginated,
+    listScrolls => \&listScrolls,
+    getMyScrollVersions => \&getMyScrollVersions
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -1209,6 +1211,74 @@ MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
 	$sql->execute($json_post->{user_id}, $json_post->{left_off}, $json_post->{limit});
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+sub listScrolls() {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_data_owner.scroll_version_id, 
+	scroll_version.user_id,
+	COUNT(DISTINCT scroll_version.scroll_version_id) AS number_of_versions, 
+	CONCAT('[', GROUP_CONCAT(DISTINCT scroll_version.scroll_version_id SEPARATOR ','),']') AS scroll_version_ids,
+	CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ','),']') AS thumbnails, 
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version USING(scroll_version_id)
+LEFT JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+LEFT JOIN image_to_edition_catalog USING(edition_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+WHERE scroll_version.user_id = 1
+GROUP BY scroll_data.scroll_id
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute();
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+sub getMyScrollVersions () {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT scroll_data.name, 
+	scroll_version_group.scroll_version_group_id, 
+	CONCAT('{"name":"',admin.user_name, '","user_id":', admin.user_id, "}") AS owner,
+	CONCAT('[', GROUP_CONCAT(DISTINCT '{"name":"', user.user_name, '","user_id":', user.user_id, ',"scroll_version_id":', sv2.scroll_version_id, ',"may_write":', sv2.may_write, ',"may_lock":', sv2.may_lock, '}'  SEPARATOR ','),']') AS shared,
+	COUNT(DISTINCT sv2.scroll_version_id) AS number_of_versions, 
+	CONCAT('[', GROUP_CONCAT(DISTINCT sv2.scroll_version_id SEPARATOR ','),']') AS scroll_version_ids,
+	CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ','),']') AS thumbnails, 
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+FROM scroll_data
+JOIN scroll_data_owner USING(scroll_data_id)
+JOIN scroll_version AS sv1 USING(scroll_version_id)
+JOIN scroll_version_group ON sv1.scroll_version_group_id = scroll_version_group.scroll_version_group_id
+JOIN scroll_version AS sv2 ON sv2.scroll_version_group_id = scroll_version_group.scroll_version_group_id
+LEFT JOIN edition_catalog ON edition_catalog.scroll_id = scroll_data.scroll_id
+	AND edition_catalog.edition_side = 0
+LEFT JOIN image_to_edition_catalog USING(edition_catalog_id)
+LEFT JOIN SQE_image ON SQE_image.image_catalog_id = image_to_edition_catalog.image_catalog_id
+	AND SQE_image.type = 0
+LEFT JOIN image_urls USING(image_urls_id)
+JOIN user ON user.user_id = sv2.user_id
+JOIN scroll_version_group_admin ON scroll_version_group.scroll_version_group_id = scroll_version_group_admin.scroll_version_group_id
+JOIN user AS admin ON scroll_version_group_admin.user_id = admin.user_id
+WHERE sv1.user_id = ?
+GROUP BY sv1.scroll_version_group_id
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{user_id});
 
 	readResults($sql, $key, $lastItem);
 	return;
