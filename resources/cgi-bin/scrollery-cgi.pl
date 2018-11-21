@@ -71,7 +71,9 @@ sub processCGI {
     listingOfAllManuscripts => \&listingOfAllManuscripts,
     listingOfAllManuscriptsPaginated => \&listingOfAllManuscriptsPaginated,
     listScrolls => \&listScrolls,
-    getMyScrollVersions => \&getMyScrollVersions
+    getMyScrollVersions => \&getMyScrollVersions,
+    getScrollVersions => \&getScrollVersions,
+    getScrollVersionInfo => \&getScrollVersionInfo
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -1253,7 +1255,7 @@ sub getMyScrollVersions () {
 	my $getCombsQuery = <<'MYSQL';
 SELECT scroll_data.name, 
 	scroll_version_group.scroll_version_group_id, 
-	CONCAT('{"name":"',admin.user_name, '","user_id":', admin.user_id, "}") AS owner,
+	JSON_OBJECT("name", admin.user_name, "user_id", admin.user_id) AS owner,
 	CONCAT('[', GROUP_CONCAT(DISTINCT '{"name":"', user.user_name, '","user_id":', user.user_id, ',"scroll_version_id":', sv2.scroll_version_id, ',"may_write":', sv2.may_write, ',"may_lock":', sv2.may_lock, '}'  SEPARATOR ','),']') AS shared,
 	COUNT(DISTINCT sv2.scroll_version_id) AS number_of_versions, 
 	CONCAT('[', GROUP_CONCAT(DISTINCT sv2.scroll_version_id SEPARATOR ','),']') AS scroll_version_ids,
@@ -1279,6 +1281,76 @@ MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
 	$sql->execute($json_post->{user_id});
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+sub getScrollVersions () {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT  sv1.scroll_version_id AS scrollVersionId, 
+    user.user_name AS userName, 
+    scroll_data.name AS scrollName,
+    COUNT(DISTINCT artefact_position_owner.artefact_position_id) AS numOfArtefacts,
+    COUNT(DISTINCT col_data_owner.col_data_id) AS numOfColsFrags,
+    svg2.locked,
+    sv1.may_write AS canWrite,
+    sv1.may_lock AS canLock,
+    MAX(main_action.time) AS lastEdit
+FROM scroll_version_group AS svg1
+JOIN scroll_version AS sv1 ON svg1.scroll_version_group_id = sv1.scroll_version_group_id
+JOIN scroll_version_group AS svg2 ON svg2.scroll_id = svg1.scroll_id
+JOIN scroll_version AS sv2 ON svg2.scroll_version_group_id = sv2.scroll_version_group_id
+JOIN user ON user.user_id = sv2.user_id 
+JOIN scroll_data_owner ON sv2.scroll_version_id = scroll_data_owner.scroll_version_id
+JOIN scroll_data USING(scroll_data_id)
+LEFT JOIN artefact_position_owner ON artefact_position_owner.scroll_version_id = sv2.scroll_version_id
+LEFT JOIN col_data_owner ON col_data_owner.scroll_version_id = sv2.scroll_version_id
+LEFT JOIN main_action ON main_action.scroll_version_id = sv2.scroll_version_id
+WHERE sv1.scroll_version_id = ?
+    AND (sv2.user_id = 1 OR sv2.user_id = ?)
+GROUP BY sv2.scroll_version_id
+
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{scroll_version_id}, $json_post->{user_id});
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+sub getScrollVersionInfo () {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT  scroll_version.scroll_version_id AS scrollVersionId, 
+    user.user_name AS userName, 
+    scroll_data.name AS scrollName,
+    COUNT(DISTINCT artefact_position_owner.artefact_position_id) AS numOfArtefacts,
+    COUNT(DISTINCT col_data_owner.col_data_id) AS numOfColsFrags,
+    scroll_version_group.locked,
+    scroll_version.may_write AS canWrite,
+    scroll_version.may_lock AS canLock,
+    MAX(main_action.time) AS lastEdit
+FROM scroll_version
+JOIN scroll_version_group USING(scroll_version_group_id)
+JOIN user USING(user_id)
+JOIN scroll_data_owner USING(scroll_version_id)
+JOIN scroll_data USING(scroll_data_id)
+LEFT JOIN artefact_position_owner USING(scroll_version_id)
+LEFT JOIN col_data_owner USING(scroll_version_id)
+LEFT JOIN main_action USING(scroll_version_id)
+WHERE scroll_version.scroll_version_id = ?
+    AND (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+GROUP BY scroll_version.scroll_version_id
+
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{scroll_version_id}, $json_post->{user_id});
 
 	readResults($sql, $key, $lastItem);
 	return;
