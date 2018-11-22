@@ -187,7 +187,7 @@ ORDER BY scroll_version.user_id DESC, LPAD(SPLIT_STRING(name, "Q", 1), 3, "0"),
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{user_id});
+	$sql->execute($cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -470,7 +470,7 @@ sub getInstitutionArtefacts {
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getInstitutionArtefactsQuery)
 		or die "{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{image_catalog_id}, $json_post->{user_id});
+	$sql->execute($json_post->{image_catalog_id}, $cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1074,7 +1074,7 @@ GROUP BY scroll_data.scroll_id
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{user_id}, $json_post->{search_term});
+	$sql->execute($cgi->dbh->user_id, $json_post->{search_term});
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1116,7 +1116,7 @@ ORDER BY image_catalog.image_catalog_id
 MYSQL
     $sql = $cgi->dbh->prepare_cached($findPlateQuery) or die
         "{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-    $sql->execute($json_post->{user_id}, $json_post->{plate}, $json_post->{fragment});
+    $sql->execute($cgi->dbh->user_id, $json_post->{plate}, $json_post->{fragment});
   } else {
       $findPlateQuery = <<'MYSQL';
 SELECT scroll_data.name, 
@@ -1144,7 +1144,7 @@ ORDER BY image_catalog.image_catalog_id
 MYSQL
     $sql = $cgi->dbh->prepare_cached($findPlateQuery) or die
         "{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-    $sql->execute($json_post->{user_id}, $json_post->{plate});
+    $sql->execute($cgi->dbh->user_id, $json_post->{plate});
   }
 
 	readResults($sql, $key, $lastItem);
@@ -1178,7 +1178,7 @@ GROUP BY scroll_data.scroll_id
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{user_id});
+	$sql->execute($cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1213,7 +1213,7 @@ LIMIT ?
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{user_id}, $json_post->{left_off}, $json_post->{limit});
+	$sql->execute($cgi->dbh->user_id, $json_post->{left_off}, $json_post->{limit});
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1281,7 +1281,7 @@ GROUP BY sv1.scroll_version_group_id
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{user_id});
+	$sql->execute($cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1317,7 +1317,7 @@ GROUP BY sv2.scroll_version_id
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{scroll_version_id}, $json_post->{user_id});
+	$sql->execute($json_post->{scroll_version_id}, $cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1351,7 +1351,7 @@ GROUP BY scroll_version.scroll_version_id
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{scroll_version_id}, $json_post->{user_id});
+	$sql->execute($json_post->{scroll_version_id}, $cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
@@ -1387,7 +1387,7 @@ GROUP BY image_catalog.image_catalog_id
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
-	$sql->execute($json_post->{scroll_version_id}, $json_post->{user_id});
+	$sql->execute($json_post->{scroll_version_id}, $cgi->dbh->user_id);
 
 	readResults($sql, $key, $lastItem);
 	return;
