@@ -73,7 +73,8 @@ sub processCGI {
     listScrolls => \&listScrolls,
     getMyScrollVersions => \&getMyScrollVersions,
     getScrollVersions => \&getScrollVersions,
-    getScrollVersionInfo => \&getScrollVersionInfo
+    getScrollVersionInfo => \&getScrollVersionInfo,
+    getScrollVersionFragments => \&getScrollVersionFragments
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -1346,6 +1347,42 @@ LEFT JOIN main_action USING(scroll_version_id)
 WHERE scroll_version.scroll_version_id = ?
     AND (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
 GROUP BY scroll_version.scroll_version_id
+
+MYSQL
+	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
+			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
+	$sql->execute($json_post->{scroll_version_id}, $json_post->{user_id});
+
+	readResults($sql, $key, $lastItem);
+	return;
+	
+}
+
+sub getScrollVersionFragments () {
+	my ($cgi, $json_post, $key, $lastItem) = @_;
+	my $getCombsQuery = <<'MYSQL';
+SELECT image_catalog.institution,
+   image_catalog.catalog_number_1 AS plate,
+   image_catalog.catalog_number_2 AS fragment,
+   image_catalog.image_catalog_id AS imageCatalogId,
+   CONCAT('[', JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id), ']') AS artefacts,
+   COUNT(artefact_shape.artefact_shape_id) AS numOfArtefacts,
+   CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"'), ']') AS imageUrls,
+   COUNT(SQE_image.sqe_image_id) AS numOfImages
+FROM edition_catalog
+JOIN scroll_version_group USING(scroll_id)
+JOIN scroll_version USING(scroll_version_group_id)
+JOIN image_to_edition_catalog USING(edition_catalog_id)
+JOIN image_catalog USING(image_catalog_id)
+JOIN SQE_image USING(image_catalog_id)
+JOIN image_urls USING(image_urls_id)
+LEFT JOIN artefact_shape ON artefact_shape.id_of_sqe_image = SQE_image.sqe_image_id
+LEFT JOIN artefact_shape_owner USING(artefact_shape_id)
+LEFT JOIN artefact_data USING(artefact_id)
+LEFT JOIN artefact_data_owner USING(artefact_data_id)
+WHERE scroll_version.scroll_version_id = ?
+    AND (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
+GROUP BY image_catalog.image_catalog_id
 
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
