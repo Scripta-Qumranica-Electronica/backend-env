@@ -1291,14 +1291,14 @@ MYSQL
 sub getScrollVersions () {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
 	my $getCombsQuery = <<'MYSQL';
-SELECT  sv1.scroll_version_id AS scrollVersionId, 
+SELECT  sv2.scroll_version_id AS scrollVersionId, 
     user.user_name AS userName, 
     scroll_data.name AS scrollName,
     COUNT(DISTINCT artefact_position_owner.artefact_position_id) AS numOfArtefacts,
     COUNT(DISTINCT col_data_owner.col_data_id) AS numOfColsFrags,
     svg2.locked,
-    sv1.may_write AS canWrite,
-    sv1.may_lock AS canLock,
+    sv2.may_write AS canWrite,
+    sv2.may_lock AS canLock,
     MAX(main_action.time) AS lastEdit
 FROM scroll_version_group AS svg1
 JOIN scroll_version AS sv1 ON svg1.scroll_version_group_id = sv1.scroll_version_group_id
