@@ -1261,7 +1261,8 @@ SELECT scroll_data.name,
 	COUNT(DISTINCT sv2.scroll_version_id) AS number_of_versions, 
 	CONCAT('[', GROUP_CONCAT(DISTINCT sv2.scroll_version_id SEPARATOR ','),']') AS scroll_version_ids,
 	CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ','),']') AS thumbnails, 
-	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
+	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments,
+	sv1.scroll_version_id
 FROM scroll_data
 JOIN scroll_data_owner USING(scroll_data_id)
 JOIN scroll_version AS sv1 USING(scroll_version_id)
@@ -1291,9 +1292,9 @@ MYSQL
 sub getScrollVersions () {
 	my ($cgi, $json_post, $key, $lastItem) = @_;
 	my $getCombsQuery = <<'MYSQL';
-SELECT  sv2.scroll_version_id AS scrollVersionId, 
+SELECT  sv2.scroll_version_id, 
 	JSON_OBJECT("name", user.user_name, "user_id", user.user_id) AS owner,
-    scroll_data.name AS scrollName,
+    scroll_data.name AS name,
     COUNT(DISTINCT artefact_position_owner.artefact_position_id) AS numOfArtefacts,
     COUNT(DISTINCT col_data_owner.col_data_id) AS numOfColsFrags,
     svg2.locked,
