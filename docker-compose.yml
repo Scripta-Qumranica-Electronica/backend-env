@@ -1,8 +1,8 @@
-version: '2'
+version: '3'
 
 services:
   sqe.data:
-    image: bronsonbdevost/sqe-database:0.4.2
+    image: bronsonbdevost/sqe-database:0.6.1
     container_name: SQE_Database
     environment:
       - MYSQL_ROOT_PASSWORD=none
@@ -10,9 +10,6 @@ services:
       - "3306"
     ports:
       - "3307:3306"
-    volumes:
-      - ./resources/data-backup:/tmp/backup
-      - sqe-mariadb:/var/lib/mysql
     networks:
       - sqe-dev
 
@@ -45,12 +42,6 @@ services:
     command: ["/socket/node_modules/.bin/nodemon", "-L", "--watch", "/socket", "/socket/app.js"]
     networks:
       - sqe-dev
-
-volumes:
-  sqe-mariadb:
-#   resources/data-backup:
-#   resources/cgi-bin:
-#   resources/perl-libs:
 
 networks:
   sqe-dev:

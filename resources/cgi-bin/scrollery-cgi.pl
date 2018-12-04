@@ -20,61 +20,61 @@ sub processCGI {
 	}
 
 	my %actions = (
-		validateSession => \&validateSession,
-		getCombs => \&getCombs,
-    getImages => \&getImages,
-		getArtOfComb => \&getArtOfComb,
-		getArtOfImage => \&getArtOfImage,
-		getImgOfComb => \&getImgOfComb,
-		getColOfComb => \&getColOfComb,
-		getSignStreamOfColumn => \&getSignStreamOfColumn,
-		getSignStreamOfFrag => \&getSignStreamOfFrag,
-		getImagesOfFragment => \&getImagesOfFragment,
-		imagesOfInstFragments => \&imagesOfInstFragments,
-		getInstitutionArtefacts => \&getInstitutionArtefacts,
-		getScrollWidth => \&getScrollWidth,
-		getScrollHeight => \&getScrollHeight,
-		newArtefact => \&newArtefact,
-		getArtefactMask => \&getArtefactMask,
-		getScrollArtefacts => \&getScrollArtefacts,
-		newCombination => \&newCombination,
-		copyCombination => \&copyCombination,
-		nameCombination => \&nameCombination,
-    removeCombination => \&removeCombination,
-    addArtefact => \&addArtefact,
-    removeArtefact => \&removeArtefact,
-    changeArtefactShape => \&changeArtefactShape,
-    changeArtefactPosition => \&changeArtefactPosition,
-    changeArtefactData => \&changeArtefactData,
-		changeArtefactPoly => \&changeArtefactPoly,
-		setArtPosition => \&setArtPosition,
-		setArtRotation => \&setArtRotation,
-		addSigns => \&addSigns,
-		removeSigns => \&removeSigns,
-		addSignAttribute => \&addSignAttribute,
-		removeSignAttribute => \&removeSignAttribute,
-		addSignCharVariant => \&addSignCharVariant,
-		removeSignChar => \&removeSignChar,
-		addSignCharAttributeCommentary => \&addSignCharAttributeCommentary,
-		removeSignCharAttributeCommentary => \&removeSignCharAttributeCommentary,
-    getSignCharAttributeCommentary => \& getSignCharAttributeCommentary,
-		addRoiToScroll => \&addRoiToScroll,
-		removeROI => \&removeROI,
-		getRoiOfCol => \&getRoiOfCol,
-		getRoisOfCombination => \&getRoisOfCombination,
-		getTextOfFragment => \&getTextOfFragment,
-		getListOfAttributes => \&getListOfAttributes,
-    changeColName => \&changeColName,
-    changeCombinationName => \&changeCombinationName,
-    searchCombinationsByManuscript => \&searchCombinationsByManuscript,
-    searchCombinationsByPlate => \&searchCombinationsByPlate,
-    listingOfAllManuscripts => \&listingOfAllManuscripts,
-    listingOfAllManuscriptsPaginated => \&listingOfAllManuscriptsPaginated,
-    listScrolls => \&listScrolls,
-    getMyScrollVersions => \&getMyScrollVersions,
-    getScrollVersions => \&getScrollVersions,
-    getScrollVersionInfo => \&getScrollVersionInfo,
-    getScrollVersionFragments => \&getScrollVersionFragments
+        validateSession => \&validateSession,
+        getCombs => \&getCombs,
+        getImages => \&getImages,
+        getArtOfComb => \&getArtOfComb,
+        getArtOfImage => \&getArtOfImage,
+        getImgOfComb => \&getImgOfComb,
+        getColOfComb => \&getColOfComb,
+        getSignStreamOfColumn => \&getSignStreamOfColumn,
+        getSignStreamOfFrag => \&getSignStreamOfFrag,
+        getImagesOfFragment => \&getImagesOfFragment,
+        imagesOfInstFragments => \&imagesOfInstFragments,
+        getInstitutionArtefacts => \&getInstitutionArtefacts,
+        getScrollWidth => \&getScrollWidth,
+        getScrollHeight => \&getScrollHeight,
+        newArtefact => \&newArtefact,
+        getArtefactMask => \&getArtefactMask,
+        getScrollArtefacts => \&getScrollArtefacts,
+        newCombination => \&newCombination,
+        copyCombination => \&copyCombination,
+        nameCombination => \&nameCombination,
+        removeCombination => \&removeCombination,
+        addArtefact => \&addArtefact,
+        removeArtefact => \&removeArtefact,
+        changeArtefactShape => \&changeArtefactShape,
+        changeArtefactPosition => \&changeArtefactPosition,
+        changeArtefactData => \&changeArtefactData,
+        changeArtefactPoly => \&changeArtefactPoly,
+        setArtPosition => \&setArtPosition,
+        setArtRotation => \&setArtRotation,
+        addSigns => \&addSigns,
+        removeSigns => \&removeSigns,
+        addSignAttribute => \&addSignAttribute,
+        removeSignAttribute => \&removeSignAttribute,
+        addSignCharVariant => \&addSignCharVariant,
+        removeSignChar => \&removeSignChar,
+        addSignCharAttributeCommentary => \&addSignCharAttributeCommentary,
+        removeSignCharAttributeCommentary => \&removeSignCharAttributeCommentary,
+        getSignCharAttributeCommentary => \& getSignCharAttributeCommentary,
+        addRoiToScroll => \&addRoiToScroll,
+        removeROI => \&removeROI,
+        getRoiOfCol => \&getRoiOfCol,
+        getRoisOfCombination => \&getRoisOfCombination,
+        getTextOfFragment => \&getTextOfFragment,
+        getListOfAttributes => \&getListOfAttributes,
+        changeColName => \&changeColName,
+        changeCombinationName => \&changeCombinationName,
+        searchCombinationsByManuscript => \&searchCombinationsByManuscript,
+        searchCombinationsByPlate => \&searchCombinationsByPlate,
+        listingOfAllManuscripts => \&listingOfAllManuscripts,
+        listingOfAllManuscriptsPaginated => \&listingOfAllManuscriptsPaginated,
+        listScrolls => \&listScrolls,
+        getMyScrollVersions => \&getMyScrollVersions,
+        getScrollVersions => \&getScrollVersions,
+        getScrollVersionInfo => \&getScrollVersionInfo,
+        getScrollVersionFragments => \&getScrollVersionFragments
 	);
 	my $json_post = $cgi->{CGIDATA};
 
@@ -1057,7 +1057,7 @@ sub searchCombinationsByManuscript() {
 SELECT scroll_data.name, 
 	scroll_data_owner.scroll_version_id, 
 	scroll_version.user_id, 
-	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	GROUP_CONCAT('"', image_urls.proxy, image_urls.url, SQE_image.filename, '"' SEPARATOR ',') AS thumbnails, 
 	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
 FROM scroll_data
 JOIN scroll_data_owner USING(scroll_data_id)
@@ -1093,7 +1093,7 @@ sub searchCombinationsByPlate() {
 SELECT scroll_data.name, 
 	scroll_data_owner.scroll_version_id, 
 	scroll_version.user_id, 
-	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails,
+	GROUP_CONCAT('"', image_urls.proxy, image_urls.url, SQE_image.filename, '"' SEPARATOR ',') AS thumbnails,
 	image_catalog.catalog_number_1 AS plate,
 	image_catalog.catalog_number_2 AS fragment,
   image_catalog.image_catalog_id,
@@ -1122,7 +1122,7 @@ MYSQL
 SELECT scroll_data.name, 
 	scroll_data_owner.scroll_version_id, 
 	scroll_version.user_id, 
-	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails,
+	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '"' SEPARATOR ',') AS thumbnails,
 	image_catalog.catalog_number_1 AS plate,
 	image_catalog.catalog_number_2 AS fragment,
   image_catalog.image_catalog_id,
@@ -1162,7 +1162,7 @@ sub listingOfAllManuscripts() {
 SELECT scroll_data.name, 
 	scroll_data_owner.scroll_version_id, 
 	scroll_version.user_id, 
-	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	GROUP_CONCAT('"', image_urls.proxy, image_urls.url, SQE_image.filename, '"' SEPARATOR ',') AS thumbnails, 
 	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
 FROM scroll_data
 JOIN scroll_data_owner USING(scroll_data_id)
@@ -1195,7 +1195,7 @@ sub listingOfAllManuscriptsPaginated() {
 SELECT scroll_data.name, 
 	scroll_data_owner.scroll_version_id, 
 	scroll_version.user_id, 
-	GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ',') AS thumbnails, 
+	GROUP_CONCAT('"', image_urls.proxy, image_urls.url, SQE_image.filename, '"' SEPARATOR ',') AS thumbnails, 
 	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
 FROM scroll_data
 JOIN scroll_data_owner USING(scroll_data_id)
@@ -1228,7 +1228,7 @@ SELECT scroll_data.name,
 	scroll_version.user_id,
 	COUNT(DISTINCT scroll_version.scroll_version_id) AS number_of_versions, 
 	CONCAT('[', GROUP_CONCAT(DISTINCT scroll_version.scroll_version_id SEPARATOR ','),']') AS scroll_version_ids,
-	CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ','),']') AS thumbnails, 
+	CONCAT('[', GROUP_CONCAT('"', image_urls.proxy, image_urls.url, SQE_image.filename, '"' SEPARATOR ','),']') AS thumbnails, 
 	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments
 FROM scroll_data
 JOIN scroll_data_owner USING(scroll_data_id)
@@ -1260,7 +1260,7 @@ SELECT scroll_data.name,
 	CONCAT('[', GROUP_CONCAT(DISTINCT '{"name":"', user.user_name, '","user_id":', user.user_id, ',"scroll_version_id":', sv2.scroll_version_id, ',"may_write":', sv2.may_write, ',"may_lock":', sv2.may_lock, '}'  SEPARATOR ','),']') AS shared,
 	COUNT(DISTINCT sv2.scroll_version_id) AS number_of_versions, 
 	CONCAT('[', GROUP_CONCAT(DISTINCT sv2.scroll_version_id SEPARATOR ','),']') AS scroll_version_ids,
-	CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"' SEPARATOR ','),']') AS thumbnails, 
+	CONCAT('[', GROUP_CONCAT('"', image_urls.proxy, image_urls.url, SQE_image.filename, '"' SEPARATOR ','),']') AS thumbnails, 
 	COUNT(DISTINCT SQE_image.sqe_image_id) as imaged_fragments,
 	sv1.scroll_version_id
 FROM scroll_data
@@ -1368,8 +1368,17 @@ SELECT image_catalog.institution,
    image_catalog.image_catalog_id AS imageCatalogId,
    CONCAT('[', JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id), ']') AS artefacts,
    COUNT(artefact_shape.artefact_shape_id) AS numOfArtefacts,
-   CONCAT('[', GROUP_CONCAT('"', image_urls.url, SQE_image.filename, '/full/150,/0/', image_urls.suffix, '"'), ']') AS imageUrls,
-   COUNT(SQE_image.sqe_image_id) AS numOfImages
+   CONCAT('[', GROUP_CONCAT('"', CASE 
+        WHEN SQE_image.type = 0 THEN 'color'
+        WHEN SQE_image.type = 1 THEN 'infrared'
+        WHEN SQE_image.type = 2 THEN 'raking-left'
+        WHEN SQE_image.type = 2 THEN 'raking-right'
+     END, '":"', image_urls.proxy, image_urls.url, SQE_image.filename, '"'), ']') AS imageUrls,
+   COUNT(SQE_image.sqe_image_id) AS numOfImages,
+   CASE 
+        WHEN image_catalog.catalog_side = 0 THEN 'recto'
+        WHEN image_catalog.catalog_side = 1 THEN 'verso'
+     END as side
 FROM edition_catalog
 JOIN scroll_version_group USING(scroll_id)
 JOIN scroll_version USING(scroll_version_group_id)

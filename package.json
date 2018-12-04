@@ -6,8 +6,12 @@
     "bootstrap": "node ./bin/bootstrap.js"
   },
   "dependencies": {
+    "chalk": "^2.4.1",
     "command-exists": "^1.2.8",
-    "mariadb": "^2.0.0-alpha",
+    "compressing": "^1.4.0",
+    "fs-extra": "^7.0.1",
+    "mariadb": "^2.0.1-beta",
+    "md5-file": "^4.0.0",
     "rimraf": "^2.6.2"
   }
 }
