@@ -1366,9 +1366,9 @@ SELECT image_catalog.institution,
    image_catalog.catalog_number_1 AS plate,
    image_catalog.catalog_number_2 AS fragment,
    image_catalog.image_catalog_id AS imageCatalogId,
-   CONCAT('[', JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id), ']') AS artefacts,
+   CONCAT('[', GROUP_CONCAT(DISTINCT JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id)), ']') AS artefacts,
    COUNT(artefact_shape.artefact_shape_id) AS numOfArtefacts,
-   CONCAT('[', GROUP_CONCAT('"', CASE 
+   CONCAT('[', GROUP_CONCAT(DISTINCT '"', CASE 
         WHEN SQE_image.type = 0 THEN 'color'
         WHEN SQE_image.type = 1 THEN 'infrared'
         WHEN SQE_image.type = 2 THEN 'raking-left'
