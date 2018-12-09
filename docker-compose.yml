@@ -2,7 +2,7 @@ version: '3'
 
 services:
   sqe.data:
-    image: bronsonbdevost/sqe-database:0.6.2
+    image: qumranica/sqe-database:0.7.1
     container_name: SQE_Database
     environment:
       - MYSQL_ROOT_PASSWORD=none
