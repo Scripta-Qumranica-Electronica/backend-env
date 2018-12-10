@@ -1365,7 +1365,7 @@ sub getScrollVersionFragments () {
 SELECT image_catalog.institution,
    image_catalog.catalog_number_1 AS plate,
    image_catalog.catalog_number_2 AS fragment,
-   CONCAT('[', GROUP_CONCAT(DISTINCT JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id)), ']') AS artefacts,
+   CONCAT('[', GROUP_CONCAT(DISTINCT CASE WHEN artefact_data.artefact_id IS NOT NULL THEN JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id) END), ']') AS artefacts,
    COUNT(artefact_shape.artefact_shape_id) AS numOfArtefacts,
    COUNT(SQE_image.sqe_image_id) AS numOfImages,
    CONCAT('{"recto":{"image_catalog_id":', image_catalog.image_catalog_id, ',', CONCAT(GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 0 THEN CONCAT( '"', CASE 
