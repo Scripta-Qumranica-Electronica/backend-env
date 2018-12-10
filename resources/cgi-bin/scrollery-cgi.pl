@@ -1368,17 +1368,19 @@ SELECT image_catalog.institution,
    image_catalog.image_catalog_id AS imageCatalogId,
    CONCAT('[', GROUP_CONCAT(DISTINCT JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id)), ']') AS artefacts,
    COUNT(artefact_shape.artefact_shape_id) AS numOfArtefacts,
-   CONCAT('[', GROUP_CONCAT(DISTINCT '"', CASE 
+   COUNT(SQE_image.sqe_image_id) AS numOfImages,
+   CONCAT('{"recto":', CONCAT('{', GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 0 THEN CONCAT( '"', CASE 
         WHEN SQE_image.type = 0 THEN 'color'
         WHEN SQE_image.type = 1 THEN 'infrared'
         WHEN SQE_image.type = 2 THEN 'raking-left'
-        WHEN SQE_image.type = 2 THEN 'raking-right'
-     END, '":"', image_urls.proxy, image_urls.url, SQE_image.filename, '"'), ']') AS imageUrls,
-   COUNT(SQE_image.sqe_image_id) AS numOfImages,
-   CASE 
-        WHEN image_catalog.catalog_side = 0 THEN 'recto'
-        WHEN image_catalog.catalog_side = 1 THEN 'verso'
-     END as side
+        WHEN SQE_image.type = 3 THEN 'raking-right'
+     END, '":"', image_urls.proxy, image_urls.url, SQE_image.filename, '"') END), '},'),
+   '"verso":', CONCAT('{', GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 1 THEN CONCAT( '"', CASE 
+        WHEN SQE_image.type = 0 THEN 'color'
+        WHEN SQE_image.type = 1 THEN 'infrared'
+        WHEN SQE_image.type = 2 THEN 'raking-left'
+        WHEN SQE_image.type = 3 THEN 'raking-right'
+     END, '":"', image_urls.proxy, image_urls.url, SQE_image.filename, '"') END), '}}')) AS sides
 FROM edition_catalog
 JOIN scroll_version_group USING(scroll_id)
 JOIN scroll_version USING(scroll_version_group_id)
@@ -1392,8 +1394,7 @@ LEFT JOIN artefact_data USING(artefact_id)
 LEFT JOIN artefact_data_owner USING(artefact_data_id)
 WHERE scroll_version.scroll_version_id = ?
     AND (scroll_version.user_id = 1 OR scroll_version.user_id = ?)
-GROUP BY image_catalog.image_catalog_id
-
+GROUP BY image_catalog.catalog_number_1, image_catalog.catalog_number_2
 MYSQL
 	my $sql = $cgi->dbh->prepare_cached($getCombsQuery) or die
 			"{\"Couldn't prepare statement\":\"" . $cgi->dbh->errstr . "\"}";
