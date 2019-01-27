@@ -1368,13 +1368,13 @@ SELECT image_catalog.institution,
    CONCAT('[', GROUP_CONCAT(DISTINCT CASE WHEN artefact_data.artefact_id IS NOT NULL THEN JSON_OBJECT('name', artefact_data.name, 'artefact_id', artefact_data.artefact_id) END), ']') AS artefacts,
    COUNT(artefact_shape.artefact_shape_id) AS numOfArtefacts,
    COUNT(SQE_image.sqe_image_id) AS numOfImages,
-   CONCAT('{"recto":{"image_catalog_id":', image_catalog.image_catalog_id, ',', CONCAT(GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 0 THEN CONCAT( '"', CASE 
+   CONCAT('{"recto":{"image_catalog_id":', image_catalog.image_catalog_id, ', "id_of_sqe_image":', SQE_image.sqe_image_id, ',', CONCAT(GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 0 THEN CONCAT( '"', CASE 
         WHEN SQE_image.type = 0 THEN 'color'
         WHEN SQE_image.type = 1 THEN 'infrared'
         WHEN SQE_image.type = 2 THEN 'raking-left'
         WHEN SQE_image.type = 3 THEN 'raking-right'
      END, '":"', image_urls.proxy, image_urls.url, SQE_image.filename, '"') END), '},'),
-   '"verso":{"image_catalog_id":', image_catalog.image_catalog_id, ',', CONCAT(GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 1 THEN CONCAT( '"', CASE 
+   '"verso":{"image_catalog_id":', image_catalog.image_catalog_id, ', "id_of_sqe_image":', SQE_image.sqe_image_id, ',', CONCAT(GROUP_CONCAT(DISTINCT CASE WHEN image_catalog.catalog_side = 1 THEN CONCAT( '"', CASE 
         WHEN SQE_image.type = 0 THEN 'color'
         WHEN SQE_image.type = 1 THEN 'infrared'
         WHEN SQE_image.type = 2 THEN 'raking-left'
